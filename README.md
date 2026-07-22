@@ -180,6 +180,9 @@ module is a planned follow-up.
 
 ## Documentation
 
+- `docs/example-session.md` — a worked round: evidence, a flee decision,
+  an emergency vote, and the rendered chat argument (runnable via
+  `bindings/python/examples/flee_and_vote.py`).
 - `docs/model.md` — the fact-schema and rule-category rationale.
 - `docs/policy-guide.md` — how to write a game policy that links the library.
 - `docs/integration-crewrift.md` — mapping CrewRift's decoded observations

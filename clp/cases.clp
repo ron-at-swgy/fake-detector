@@ -94,12 +94,19 @@
 ;; dist > (t - st). Only a cast-iron alibi clears a suspect. (Item 2.)
 ;; ------------------------------------------------------------------
 
+;; A cast-iron alibi is a walking-cost argument: "?c could not have
+;; legally reached the scene". A color with a vent-suspected fact has
+;; demonstrated exactly the ability that voids that argument, so no
+;; room-distance alibi can clear it. The (not ...) sits INSIDE the
+;; logical block: a vent observed after the alibi derived retracts the
+;; alibi (and, through term-cast-iron's logical CE, its -8000 term).
 (defrule derive-cast-iron-alibi
   (declare (salience 140))
   (logical
     (kill-window (victim ?v) (from-tick ?f) (to-tick ?t) (room ?k))
     (alibi (color ?c) (victim ?v) (at-room ?r) (at-tick ?st))
-    (room-distance (from ?r) (to ?k) (cost ?d)))
+    (room-distance (from ?r) (to ?k) (cost ?d))
+    (not (vent-suspected (color ?c))))
   (test (and (> ?d (- ?st ?f)) (> ?d (- ?t ?st))))
   (not (cast-iron-alibi (color ?c) (victim ?v)))
   =>
