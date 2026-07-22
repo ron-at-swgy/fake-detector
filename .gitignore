@@ -1,0 +1,6 @@
+/build/
+*.o
+*.a
+
+# per-developer Claude Code permissions, not project state
+.claude/settings.local.json

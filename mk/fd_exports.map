@@ -1,0 +1,10 @@
+# Linker version script for libfakedetector.so (GNU ld / lld).
+# Only the fd_ public API is exported; the vendored CLIPS engine's
+# hundreds of symbols stay local, so a host process that links its own
+# CLIPS cannot collide with ours.
+FD_1 {
+	global:
+		fd_*;
+	local:
+		*;
+};

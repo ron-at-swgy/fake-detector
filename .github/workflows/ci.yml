@@ -1,0 +1,104 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  test:
+    name: test (${{ matrix.os }}, ${{ matrix.cc }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        cc: [gcc, clang]
+        exclude:
+          # Apple's gcc is clang; a real-gcc leg via Homebrew is not worth the noise.
+          - os: macos-latest
+            cc: gcc
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and run tests
+        run: make CC=${{ matrix.cc }} test
+
+  sanitize:
+    name: ASan/UBSan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run tests under sanitizers
+        run: make test-sanitize
+
+  perf:
+    name: perf (informational)
+    runs-on: ubuntu-latest
+    # Latency budgets are environment-sensitive by design; never gate merges on them.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run latency budgets
+        run: make perf
+
+  package:
+    name: install + dlopen smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install into a scratch DESTDIR
+        run: |
+          DEST=$(mktemp -d)
+          make install DESTDIR="$DEST" PREFIX=/usr
+          test -f "$DEST"/usr/include/fakedetector.h
+          test -f "$DEST"/usr/lib/libfakedetector.a
+          test -f "$DEST"/usr/lib/libfakedetector.so.1
+          test -f "$DEST"/usr/lib/pkgconfig/fakedetector.pc
+          test -f "$DEST"/usr/share/fakedetector/clp/stance.clp
+          echo "DEST=$DEST" >> "$GITHUB_ENV"
+      - name: Link against the installed static library
+        run: |
+          cat > /tmp/smoke.c <<'EOF'
+          #include <fakedetector.h>
+          #include <stdio.h>
+          int main(void) {
+              fd_detector *fd = fd_create(NULL);  /* embedded rules */
+              if (!fd) return 1;
+              printf("%s abi=%d\n", fd_version(), fd_abi_version());
+              fd_destroy(fd);
+              return 0;
+          }
+          EOF
+          cc -I"$DEST"/usr/include /tmp/smoke.c \
+             "$DEST"/usr/lib/libfakedetector.a -lm -o /tmp/smoke
+          /tmp/smoke
+      - name: dlopen the shared library from Python
+        run: |
+          python3 - <<EOF
+          import ctypes
+          lib = ctypes.CDLL("$DEST/usr/lib/libfakedetector.so.1")
+          assert lib.fd_abi_version() == 1
+          lib.fd_create.restype = ctypes.c_void_p
+          fd = lib.fd_create(None)  # embedded rules
+          assert fd, "fd_create(NULL) failed"
+          lib.fd_destroy(ctypes.c_void_p(fd))
+          print("dlopen smoke OK")
+          EOF
+      - name: Python binding tests
+        run: |
+          pip install ./bindings/python
+          cd bindings/python
+          FD_LIBRARY_PATH="$DEST"/usr/lib/libfakedetector.so.1 \
+              python3 -m unittest discover -s tests -v
+
+  bmake:
+    name: BSDmakefile (bmake)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install bmake
+        run: sudo apt-get update && sudo apt-get install -y bmake
+      - name: Build and test via BSD dialect
+        run: |
+          bmake -f BSDmakefile all
+          bmake -f BSDmakefile test

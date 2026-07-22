@@ -1,0 +1,11 @@
+prefix=@PREFIX@
+libdir=${prefix}/lib
+includedir=${prefix}/include
+clpdir=${prefix}/share/fakedetector/clp
+
+Name: fakedetector
+Description: Detective brain for social-deception games (CLIPS rules engine + C API)
+Version: @VERSION@
+Libs: -L${libdir} -lfakedetector
+Libs.private: -lm
+Cflags: -I${includedir}

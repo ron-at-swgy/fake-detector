@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fakedetector"
+version = "1.0.0"
+description = "Python binding for libfakedetector, a detective brain for social-deception games"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+
+[tool.setuptools.packages.find]
+include = ["fakedetector*"]
+
+[tool.setuptools.package-data]
+fakedetector = ["_lib/*"]

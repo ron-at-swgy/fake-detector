@@ -1,0 +1,133 @@
+fake-detector verdicts (self=red, tick=200, phase=voting):
+  yellow      threat   impossible movement: medbay to admin in 25 ticks (likely vent)
+  pink        threat   sighted in storage at tick 178 near body; no alibi
+  lime        off-task alive, no task progress observed
+  blue        on-task  observed 3 task completions
+  deceased: green(body)
+Case file: the murder of green
+  Body discovered in storage at tick 178.
+  Kill window: ticks 140..178.
+  Suspects:
+    yellow - vented from medbay to admin
+    pink - sighted in storage near body at tick 178
+  Cleared:
+    lime - cast-iron alibi: sighted in cafeteria at tick 175, too far from the scene
+    blue - cast-iron alibi: sighted in admin at tick 150, too far from the scene
+  alone with pink: HIGH risk - sighted in storage at tick 178 near body; no alibi
+  alone with yellow: HIGH risk - impossible movement: medbay to admin in 25 ticks (likely vent)
+
+playstyle demo (same evidence, different policy stance):
+  alone with lime: LOW risk (trusting) - alive, no task progress observed
+  alone with blue: MEDIUM risk (paranoid) - observed 3 task completions
+
+mid-round queries:
+  occupants of cafeteria: lime
+  occupants of admin: yellow blue
+  occupants of storage: pink
+  last seen yellow: admin at tick 125
+  last seen orange: (never sighted)
+  top suspects (neutral): yellow(threat) pink(threat) lime(off-task) blue(on-task)
+  round stats: alive=4 dead=1 ejected=0 never-sighted=0 open-cases=1 vents=1 impostor-found=0
+
+telemetry:
+  explain yellow: weight=570 logodds=2150 likelihood=891 n_terms=3
+    term: source=vent-inferred key='medbay-admin-125' amount=2000
+    term: source=prior key='' amount=0
+    term: source=off-task key='' amount=150
+  run stats: runs=46 last-fired=0 total-fired=112 facts=78
+fd_dump_state: working-memory snapshot
+[round model]
+  (roster n-players=0 n-impostors=1 alive-crew=3 alive-impostors=1 impostors-ejected=0)
+  (game-pressure level='high')
+[dossier]
+  (crewmember color='green' status='dead' last-seen-tick=-1 last-seen-room='nowhere' visible-tasks=0)
+  (crewmember color='yellow' status='alive' last-seen-tick=125 last-seen-room='admin' visible-tasks=0)
+  (crewmember color='lime' status='alive' last-seen-tick=175 last-seen-room='cafeteria' visible-tasks=0)
+  (crewmember color='pink' status='alive' last-seen-tick=170 last-seen-room='storage' visible-tasks=0)
+  (crewmember color='blue' status='alive' last-seen-tick=150 last-seen-room='admin' visible-tasks=3)
+[case evidence]
+  (case victim='green' room='storage' body-tick=178)
+  (near-body color='pink' room='storage' tick=178)
+  (near-body color='green' room='storage' tick=178)
+  (vent-suspected color='yellow' from-room='medbay' to-room='admin' delta-tick=25 tick=125 basis='inferred')
+  (accusation) -- none
+[social / testimony]
+  (accuses) -- none
+  (defends) -- none
+  (contradiction) -- none
+[belief]
+  (logodds-term color='blue' source='cast-iron' key='green' amount=-8000)
+  (logodds-term color='lime' source='cast-iron' key='green' amount=-8000)
+  (logodds-term color='green' source='near-body' key='green' amount=600)
+  (logodds-term color='pink' source='near-body' key='green' amount=600)
+  (logodds-term color='yellow' source='vent-inferred' key='medbay-admin-125' amount=2000)
+  (logodds-term color='yellow' source='prior' key='' amount=0)
+  (logodds-term color='yellow' source='off-task' key='' amount=150)
+  (logodds-term color='lime' source='prior' key='' amount=0)
+  (logodds-term color='lime' source='off-task' key='' amount=150)
+  (logodds-term color='pink' source='prior' key='' amount=0)
+  (logodds-term color='pink' source='off-task' key='' amount=150)
+  (logodds-term color='blue' source='prior' key='' amount=0)
+  (logodds-term color='blue' source='off-task' key='' amount=150)
+  (logodds-term color='blue' source='on-task' key='' amount=-500)
+  (suspicion color='yellow' weight=570 logodds=2150 basis='prior')
+  (suspicion color='lime' weight=0 logodds=-7850 basis='prior')
+  (suspicion color='pink' weight=430 logodds=750 basis='prior')
+  (suspicion color='blue' weight=0 logodds=-8350 basis='prior')
+[verdict]
+  (stance color='blue' category='on-task' evidence='on-task' rationale='observed 3 task completions')
+  (stance color='pink' category='threat' evidence='near-body' rationale='sighted in storage at tick 178 near body; no alibi')
+  (stance color='lime' category='off-task' evidence='off-task' rationale='alive, no task progress observed')
+  (stance color='yellow' category='threat' evidence='vent' rationale='impossible movement: medbay to admin in 25 ticks (likely vent)')
+  alone with lime: NONE risk - all impostors already ejected this round
+
+scenario: stale alibi (kill window narrows after the alibi was granted)
+Case file: the murder of green
+  Body discovered in storage at tick 178.
+  Kill window: ticks 0..178.
+  Suspects: none (all alive crewmates alibied)
+  Cleared:
+    brown - cast-iron alibi: sighted in admin at tick 100, too far from the scene
+Case file: the murder of green
+  Body discovered in storage at tick 178.
+  Kill window: ticks 130..178.
+  Suspects:
+    brown - no alibi yet
+  *** The field has narrowed to one. The murderer of green is brown. ***
+
+scenario: weak vs cast-iron alibi (one glimpse does not clear a suspect)
+Case file: the murder of green
+  Body discovered in storage at tick 178.
+  Kill window: ticks 0..178.
+  Suspects:
+    orange - partially alibied -- seen in medbay at tick 100, but not cleared
+  Cleared:
+    white - cast-iron alibi: sighted in admin at tick 90, too far from the scene
+  *** The field has narrowed to one. The murderer of green is orange. ***
+
+scenario: directly observed vent (a witnessed vent use, independent of the room graph)
+  rationale: seen using a vent in storage at tick 64
+
+scenario: multi-impostor round (two impostors; the first ejection must not clear the board)
+  game pressure: critical, crew win prob: 133 permille
+  suspicion (before any ejection): orange=167 yellow=291 pink=210 lime=166 blue=166
+  suspicion (after first impostor ejected): orange=211 yellow=369 lime=210 blue=210
+  game pressure: high, crew win prob: 1000 permille
+
+scenario: expected-value vote gating
+  vote decision (flat round): SKIP target=orange suspicion=250 confidence=0
+    rationale: no candidate exceeds the 1-in-4 prior (250 per mille)
+  game pressure: critical, crew win prob: 0 permille
+  suspicion (endgame): yellow=695 blue=305
+  vote decision (endgame, vent caught): CAST target=yellow suspicion=695 confidence=390
+    rationale: yellow holds 695 per-mille suspicion, 390 clear of the field; expected value positive at critical pressure
+
+scenario: testimony / claims layer (chat checked against the record)
+  suspicion (claims layer): yellow=164 pink=256 lime=116 blue=115 gray=140 brown=209
+
+scenario: accusation / defense social graph (one reveal re-reads the table)
+  suspicion (before the reveal): orange=161 pink=161 lime=161 blue=161 gray=161 white=195 brown=0
+  suspicion (after pink revealed impostor): orange=135 lime=205 blue=257 gray=182 white=221 brown=0
+
+scenario: capturable rule-firing trace
+  trace captured rule-firing output

@@ -1,0 +1,3 @@
+# -exported_symbols_list for the macOS dylib: export only the fd_
+# public API (C symbols carry a leading underscore on Mach-O).
+_fd_*
