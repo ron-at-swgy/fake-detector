@@ -14,6 +14,14 @@ library was built for **Among Them** (an Among Us clone) and generalizes to
 games in that genre: hidden hostile roles, circumstantial evidence, public
 meetings and ejection votes.
 
+**See it think:** [docs/example-session.md](docs/example-session.md) walks
+one round — a vent caught by the routing check, a flee decision while
+alone with the suspect, and the emergency vote argued in prose:
+
+> *"purple is the most likely impostor -- 51% of the suspicion, 23 points
+> ahead of the runner-up -- and the game is on a knife's edge; vote them
+> out"*
+
 ## Quickstart
 
 ```
