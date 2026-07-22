@@ -29,6 +29,12 @@ SHLIB_LINK  = libfakedetector.dylib
 SHLIB_FLAGS = -dynamiclib -install_name @rpath/$(SHLIB_FILE) \
               -Wl,-exported_symbols_list,mk/fd_exports.macos
 SHLIB_DEPS  = mk/fd_exports.macos
+# Apple's headers hide non-POSIX-namespace declarations (e.g. mkdtemp
+# in <unistd.h>) when _POSIX_C_SOURCE is defined without
+# _DARWIN_C_SOURCE. Like OpenBSD (see BSDmakefile), Darwin exposes
+# POSIX.1-2008 (strdup, clock_gettime) in its default namespace, so the
+# macro is unnecessary there -- and harmful: clear it.
+APP_POSIX   =
 else
 SHLIB_FILE  = libfakedetector.so.$(FD_ABI)
 SHLIB_LINK  = libfakedetector.so
