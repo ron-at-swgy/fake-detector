@@ -116,11 +116,11 @@ scenario: multi-impostor round (two impostors; the first ejection must not clear
 
 scenario: expected-value vote gating
   vote decision (flat round): SKIP target=orange suspicion=250 confidence=0
-    rationale: no candidate exceeds the 1-in-4 prior (250 per mille)
+    rationale: nobody stands out: the top suspect orange (25%) is no better than picking at random (1 impostor among 4 players); skip
   game pressure: critical, crew win prob: 0 permille
   suspicion (endgame): yellow=695 blue=305
   vote decision (endgame, vent caught): CAST target=yellow suspicion=695 confidence=390
-    rationale: yellow holds 695 per-mille suspicion, 390 clear of the field; expected value positive at critical pressure
+    rationale: yellow is the most likely impostor -- 69% of the suspicion, 39 points ahead of the runner-up -- and the game is on a knife's edge; vote them out
 
 scenario: testimony / claims layer (chat checked against the record)
   suspicion (claims layer): yellow=164 pink=256 lime=116 blue=115 gray=140 brown=209

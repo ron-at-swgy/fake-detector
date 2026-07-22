@@ -62,12 +62,15 @@ contradiction, and purple's weight climbs. The belief-aware vote gate:
 
 ```
 vote decision: CAST -> purple (suspicion 512, confidence 239)
-  rationale: "purple holds 512 per-mille suspicion, 239 clear of the
-              field; expected value positive at critical pressure"
+  rationale: "purple is the most likely impostor -- 51% of the
+              suspicion, 23 points ahead of the runner-up -- and the
+              game is on a knife's edge; vote them out"
 ```
 
-("Critical pressure" is the parity model talking: 7 alive, 2 impostors —
-a wrong skip here is expensive, so the evidence bar drops.)
+(The "knife's edge" clause is the parity model talking: the detector has
+personally confirmed only four players alive and presumes two impostors
+among them, so a wrong skip could lose the game — the evidence bar for
+casting drops accordingly.)
 
 What we paste into the vote-chat slot — the summary, then Poirot:
 

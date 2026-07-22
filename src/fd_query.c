@@ -303,17 +303,6 @@ parse_pressure(const char *sym)
 	return FD_PRESSURE_LOW;
 }
 
-static const char *
-pressure_name(fd_game_pressure_t p)
-{
-	switch (p) {
-	case FD_PRESSURE_CRITICAL: return "critical";
-	case FD_PRESSURE_HIGH:     return "high";
-	case FD_PRESSURE_MEDIUM:   return "medium";
-	case FD_PRESSURE_LOW:
-	default:                   return "low";
-	}
-}
 
 fd_game_pressure_t
 fd_game_pressure_now(fd_detector *fd)
@@ -444,23 +433,45 @@ fd_vote_decision(fd_detector *fd, fd_vote_decision_t *out)
 	    - (long long)(1000 - best) * loss;
 	const int margin_bar = 80;
 
+	/* How urgent the vote is, in words a human parses on first read.
+	 * Indexed by fd_game_pressure_t (low..critical). */
+	static const char *const PRESSURE_PHRASE[4] = {
+		"and there is still time to be wrong",
+		"and the game is tightening",
+		"and the crew is running out of margin",
+		"and the game is on a knife's edge",
+	};
+
 	if (best <= prior) {
 		out->recommendation = FD_VOTE_SKIP;
 		snprintf(out->rationale, sizeof out->rationale,
-		    "no candidate exceeds the 1-in-%d prior (%d per mille)",
-		    alive_pool, prior);
+		    "nobody stands out: the top suspect %s (%d%%) is no "
+		    "better than picking at random (%d impostor%s among %d "
+		    "players); skip",
+		    fd_player_name(fd, best_c), best / 10,
+		    m, (m == 1) ? "" : "s", alive_pool);
 	} else if (ev > 0 && out->confidence >= margin_bar) {
 		out->recommendation = FD_VOTE_CAST;
 		snprintf(out->rationale, sizeof out->rationale,
-		    "%s holds %d per-mille suspicion, %d clear of the field; "
-		    "expected value positive at %s pressure",
-		    fd_player_name(fd, best_c), best, out->confidence,
-		    pressure_name(gp));
+		    "%s is the most likely impostor -- %d%% of the "
+		    "suspicion, %d points ahead of the runner-up -- "
+		    "%s; vote them out",
+		    fd_player_name(fd, best_c), best / 10,
+		    out->confidence / 10, PRESSURE_PHRASE[gp_idx]);
+	} else if (out->confidence < margin_bar) {
+		out->recommendation = FD_VOTE_ABSTAIN;
+		snprintf(out->rationale, sizeof out->rationale,
+		    "too close to call: %s leads the next suspect by only "
+		    "%d point%s; abstaining rather than guessing",
+		    fd_player_name(fd, best_c), out->confidence / 10,
+		    (out->confidence / 10 == 1) ? "" : "s");
 	} else {
 		out->recommendation = FD_VOTE_ABSTAIN;
 		snprintf(out->rationale, sizeof out->rationale,
-		    "top two within the %d per-mille confidence margin; "
-		    "distribution too flat to act on", margin_bar);
+		    "%s leads at %d%%, but that is not strong enough to "
+		    "risk ejecting an innocent %s; abstaining",
+		    fd_player_name(fd, best_c), best / 10,
+		    PRESSURE_PHRASE[gp_idx]);
 	}
 	return 1;
 }

@@ -294,7 +294,7 @@ fd_vote_decision(fd, &d);
 switch (d.recommendation) {
 case FD_VOTE_CAST:    cast_vote(d.target); break;  /* d.suspicion/d.confidence quantify it */
 case FD_VOTE_SKIP:    skip_vote();         break;  /* nobody beats the 1-in-N prior      */
-case FD_VOTE_ABSTAIN: abstain();           break;  /* distribution too flat to act on    */
+case FD_VOTE_ABSTAIN: abstain();           break;  /* too close to call / evidence too weak */
 }
 log(d.rationale);   /* prose — states the skip/abstain reason */
 ```
